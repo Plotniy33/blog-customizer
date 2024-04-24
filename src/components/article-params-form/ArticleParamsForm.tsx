@@ -4,11 +4,18 @@ import { Button } from 'components/button';
 import { useState } from 'react';
 import styles from './ArticleParamsForm.module.scss';
 
+
+
 export const ArticleParamsForm = () => {
-	const [openForm, setOpenForm] = useState<boolean>(false);
+	const [form, setOpenForm] = useState(false);
+
+	function openForm () {
+		setOpenForm(!form);
+	}
+
 	return (
 		<>
-			<ArrowButton isOpen={openForm} onClick={() => setOpenForm}/>
+			<ArrowButton isOpen={form} openSideBar={() => openForm()}/>
 			<aside className={styles.container}>
 				<form className={styles.form}>
 					<div className={styles.bottomContainer}>
