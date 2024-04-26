@@ -36,11 +36,27 @@ export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
 	}
 
 	useEffect(() => {
-		function handleByEsc(event: KeyboardEvent) {
+		function closeByEsc(event: KeyboardEvent) {
 			if (event.key === 'Escape' && form === true) setOpenForm(false);
 		}
-		document.addEventListener('keydown', handleByEsc);
-		return () => document.addEventListener('keydown', handleByEsc);
+
+		function closeByClickOutside(event: MouseEvent) {
+			if (
+				sideBarRef.current &&
+				!sideBarRef.current.contains(event.target as Node)
+			) {
+				setOpenForm(false);
+				// console.log('dfvdfvf');
+			}
+		}
+
+		document.addEventListener('keydown', closeByEsc);
+		document.addEventListener('mousedown', closeByClickOutside);
+
+		return () => {
+			document.removeEventListener('keydown', closeByEsc);
+			document.removeEventListener('mousedown', closeByClickOutside);
+		};
 	}, [form]);
 
 	function handleArticleParams(option: OptionType, key: string) {
@@ -62,15 +78,17 @@ export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
 		<>
 			<ArrowButton isOpen={form} openSideBar={openForm} />
 			<aside className={styles.container} ref={sideBarRef}>
-				<form className={styles.form} onSubmit={handleSubmit} onReset={handleReset}>
+				<form
+					className={styles.form}
+					onSubmit={handleSubmit}
+					onReset={handleReset}>
 					<Text
-						// as='h2'
+						as='h2'
 						size={31}
 						weight={800}
 						fontStyle='normal'
 						uppercase
 						dynamicLite>
-						{' '}
 						Задайте параметры
 					</Text>
 

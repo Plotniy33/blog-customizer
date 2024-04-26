@@ -15,7 +15,7 @@ const domNode = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(domNode);
 
 const App = () => {
-	const [formState, setFormState] = useState(defaultArticleState)
+	const [formState, setFormState] = useState(defaultArticleState);
 	return (
 		<div
 			className={clsx(styles.main)}
@@ -28,7 +28,7 @@ const App = () => {
 					'--bg-color': formState.backgroundColor.value,
 				} as CSSProperties
 			}>
-			<ArticleParamsForm data={setFormState}/>
+			<ArticleParamsForm data={setFormState} />
 			<Article />
 		</div>
 	);
