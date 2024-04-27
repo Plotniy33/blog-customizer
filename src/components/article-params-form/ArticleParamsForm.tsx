@@ -4,7 +4,7 @@ import { Text } from '../text';
 import { Select } from '../select';
 import { RadioGroup } from '../radio-group';
 import { Separator } from '../separator';
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './ArticleParamsForm.module.scss';
 import {
 	ArticleStateType,
@@ -16,54 +16,45 @@ import {
 	fontFamilyOptions,
 	fontSizeOptions,
 } from 'src/constants/articleProps';
+import { useOutsideClickClose } from '../select/hooks/useOutsideClickClose';
+import clsx from 'clsx';
 
 export type ArticleParamsFormProps = {
 	data: (articleState: ArticleStateType) => void;
 };
 
 export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
-	const [form, setOpenForm] = useState(false);
+	const [isFormOpen, setOpenForm] = useState(false);
 	const [formData, setFormData] = useState(defaultArticleState);
-	const sideBarRef = useRef<HTMLFormElement>(null);
-
-	useEffect(() => {
-		if (sideBarRef.current)
-			sideBarRef.current.classList.toggle(styles.container_open);
-	}, [form]);
 
 	function openForm() {
-		setOpenForm(!form);
+		setOpenForm(!isFormOpen);
 	}
+
+	const sideBarRef = useRef<HTMLDivElement>(null);
+	useOutsideClickClose({
+		isOpen: isFormOpen,
+		rootRef: sideBarRef,
+		onClose: () => setOpenForm(false),
+	});
 
 	useEffect(() => {
 		function closeByEsc(event: KeyboardEvent) {
-			if (event.key === 'Escape' && form === true) setOpenForm(false);
-		}
-
-		function closeByClickOutside(event: MouseEvent) {
-			if (
-				sideBarRef.current &&
-				!sideBarRef.current.contains(event.target as Node)
-			) {
-				setOpenForm(false);
-				// console.log('dfvdfvf');
-			}
+			if (event.key === 'Escape') setOpenForm(false);
 		}
 
 		document.addEventListener('keydown', closeByEsc);
-		document.addEventListener('mousedown', closeByClickOutside);
 
 		return () => {
 			document.removeEventListener('keydown', closeByEsc);
-			document.removeEventListener('mousedown', closeByClickOutside);
 		};
-	}, [form]);
+	}, [isFormOpen]);
 
 	function handleArticleParams(option: OptionType, key: string) {
 		setFormData({ ...formData, [key]: option });
 	}
 
-	function handleSubmit(event: FormEvent<HTMLFormElement>) {
+	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		props.data(formData);
 		setOpenForm(false);
@@ -76,70 +67,77 @@ export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
 
 	return (
 		<>
-			<ArrowButton isOpen={form} openSideBar={openForm} />
-			<aside className={styles.container} ref={sideBarRef}>
-				<form
-					className={styles.form}
-					onSubmit={handleSubmit}
-					onReset={handleReset}>
-					<Text
-						as='h2'
-						size={31}
-						weight={800}
-						fontStyle='normal'
-						uppercase
-						dynamicLite>
-						Задайте параметры
-					</Text>
+			<div ref={sideBarRef}>
+				<ArrowButton isOpen={isFormOpen} openSideBar={openForm} />
+				<aside
+					className={clsx(styles.container, {
+						[styles.container_open]: isFormOpen,
+					})}>
+					<form
+						className={styles.form}
+						onSubmit={handleSubmit}
+						onReset={handleReset}>
+						<Text
+							as='h2'
+							size={31}
+							weight={800}
+							fontStyle='normal'
+							uppercase
+							dynamicLite>
+							Задайте параметры
+						</Text>
 
-					<Select
-						title='Шрифт'
-						options={fontFamilyOptions}
-						selected={formData.fontFamilyOption}
-						onChange={(option) =>
-							handleArticleParams(option, 'fontFamilyOption')
-						}
-					/>
+						<Select
+							title='Шрифт'
+							options={fontFamilyOptions}
+							selected={formData.fontFamilyOption}
+							onChange={(option) =>
+								handleArticleParams(option, 'fontFamilyOption')
+							}
+						/>
 
-					<RadioGroup
-						name='fontsize'
-						title='Размер шрифта'
-						options={fontSizeOptions}
-						selected={formData.fontSizeOption}
-						onChange={(option) => handleArticleParams(option, 'fontSizeOption')}
-					/>
+						<RadioGroup
+							name='fontsize'
+							title='Размер шрифта'
+							options={fontSizeOptions}
+							selected={formData.fontSizeOption}
+							onChange={(option) =>
+								handleArticleParams(option, 'fontSizeOption')
+							}
+						/>
 
-					<Select
-						title='Цвет шрифта'
-						options={fontColors}
-						selected={formData.fontColor}
-						onChange={(option) => handleArticleParams(option, 'fontColor')}
-					/>
+						<Select
+							title='Цвет шрифта'
+							options={fontColors}
+							selected={formData.fontColor}
+							onChange={(option) => handleArticleParams(option, 'fontColor')}
+						/>
 
-					<Separator />
+						<Separator />
 
-					<Select
-						title='Цвет фона'
-						options={backgroundColors}
-						selected={formData.backgroundColor}
-						onChange={(option) =>
-							handleArticleParams(option, 'backgroundColor')
-						}
-					/>
+						<Select
+							title='Цвет фона'
+							options={backgroundColors}
+							selected={formData.backgroundColor}
+							onChange={(option) =>
+								handleArticleParams(option, 'backgroundColor')
+							}
+						/>
 
-					<Select
-						title='Ширина контента'
-						options={contentWidthArr}
-						selected={formData.contentWidth}
-						onChange={(option) => handleArticleParams(option, 'contentWidth')}
-					/>
+						<Select
+							title='Ширина контента'
+							options={contentWidthArr}
+							selected={formData.contentWidth}
+							onChange={(option) => handleArticleParams(option, 'contentWidth')}
+						/>
 
-					<div className={styles.bottomContainer}>
-						<Button title='Сбросить' type='reset' />
-						<Button title='Применить' type='submit' />
-					</div>
-				</form>
-			</aside>
+						<div className={styles.bottomContainer}>
+							<Button title='Сбросить' type='reset' />
+							<Button title='Применить' type='submit' />
+						</div>
+					</form>
+				</aside>
+			</div>
 		</>
 	);
 };
